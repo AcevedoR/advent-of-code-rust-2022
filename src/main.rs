@@ -10,6 +10,7 @@ mod challenge;
 mod advent5;
 mod advent6;
 mod advent7;
+mod advent8;
 
 fn main() -> io::Result<()> {
     let file = File::open("./src/input.txt")?;
