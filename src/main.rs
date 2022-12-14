@@ -11,6 +11,7 @@ mod advent5;
 mod advent6;
 mod advent7;
 mod advent8;
+mod advent13;
 
 fn main() -> io::Result<()> {
     let file = File::open("./src/input.txt")?;

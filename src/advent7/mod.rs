@@ -1,6 +1,4 @@
-use std::collections::{HashMap, HashSet, LinkedList, VecDeque};
 use std::fs::File;
-use std::hash::Hash;
 use std::io::{BufReader, prelude::*};
 
 use indextree::{Arena, NodeId};
@@ -18,7 +16,6 @@ fn advent7(file_path: &str, is_part_one: bool) -> u32 {
         Filee {
             name: "/".parse().unwrap(),
             size: 0,
-            content: vec![],
         }
     );
     let file_system_root = current_file;
@@ -40,7 +37,6 @@ fn advent7(file_path: &str, is_part_one: bool) -> u32 {
             let new_child = file_system_arena.new_node(Filee {
                 name: line_elements[1].to_string(),
                 size,
-                content: vec![],
             });
             current_file.append(new_child, &mut file_system_arena);
             total_used_space += size;
@@ -56,7 +52,7 @@ fn advent7(file_path: &str, is_part_one: bool) -> u32 {
     }
 }
 
-fn cd(mut file_system_arena: &mut Arena<Filee>, current_file: &mut NodeId, line_elements: &Vec<String>) -> NodeId {
+fn cd(file_system_arena: &mut Arena<Filee>, current_file: &mut NodeId, line_elements: &Vec<String>) -> NodeId {
     return if line_elements[2] == ".." {
         current_file.ancestors(&file_system_arena).skip(1).next().unwrap()
     } else {
@@ -100,7 +96,6 @@ fn sum_size(file_system_arena: &Arena<Filee>, file: NodeId, total_used_space : u
 struct Filee {
     name: String,
     size: u32,
-    content: Vec<Filee>,
 }
 
 #[cfg(test)]

@@ -1,11 +1,7 @@
-use std::collections::{HashMap, HashSet, LinkedList, VecDeque};
 use std::fs::File;
-use std::hash::Hash;
 use std::io::{BufReader, prelude::*};
 
-use indextree::{Arena, NodeId};
-
-fn advent8(file_path: &str, is_part_one: bool) -> u32 {
+fn advent8(file_path: &str) -> u32 {
     let file = File::open(file_path).unwrap();
     let reader = BufReader::new(file);
     let lines = reader.lines();
@@ -15,11 +11,9 @@ fn advent8(file_path: &str, is_part_one: bool) -> u32 {
     for line in lines {
         println!("{:?}", line);
         let tree_alley: Vec<i8> = line.unwrap().chars().map(|s| s.to_digit(10).unwrap() as i8).collect();
-        let mut column_index: usize = 0;
         let mut new_alley = Vec::new();
         for tree_height in tree_alley {
             new_alley.push(tree_height);
-            column_index += 1;
         }
         if forest.get(line_index).is_none() {
             forest.push(new_alley)
@@ -97,7 +91,7 @@ mod tests {
 
     #[test]
     fn ok_example_1() {
-        assert_eq!(advent8("./src/advent8/input_example.txt", true), 21);
+        assert_eq!(advent8("./src/advent8/input_example.txt"), 21);
     }
 
     #[test]
