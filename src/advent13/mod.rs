@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::fs::File;
 use std::io::{BufReader, prelude::*};
 
@@ -32,12 +33,50 @@ fn part_one(file_path: &str) -> u32 {
 }
 
 fn part_two(file_path: &str) -> u32 {
-    return 0;
+    let file = File::open(file_path).unwrap();
+    let reader = BufReader::new(file);
+    let mut inputs: Vec<String> = Vec::new();
+    for line_res in reader.lines() {
+        let line = line_res.unwrap();
+        if !line.is_empty() {
+            inputs.push(line);
+        }
+    }
+    inputs.push("[[2]]".to_string());
+    inputs.push("[[6]]".to_string());
+    inputs.sort_by(|a, b| compare_pair(Pair::new(a.clone(), b.clone())));
+    println!("\n\nLIST ");
+
+    let mut first_indice_value :i32 = -1;
+    let mut second_indice_value :i32 = -1;
+    let mut i = 1;
+    for input in inputs {
+        println!("{:?}", input);
+        if input == "[[2]]" {
+            first_indice_value = i;
+        }
+        if input == "[[6]]" {
+            second_indice_value = i;
+        }
+        if first_indice_value != -1 && second_indice_value != -1 {
+            return (first_indice_value * second_indice_value) as u32;
+        }
+        i+=1;
+    }
+    panic!("something bad happend");
 }
 
 struct Pair {
     left: String,
     right: String,
+}
+
+fn compare_pair(pair: Pair) -> Ordering {
+    return if compare(pair) == 1 {
+        Ordering::Less
+    } else {
+        Ordering::Greater
+    }
 }
 
 impl Pair {
@@ -180,7 +219,10 @@ mod tests {
         assert_eq!(part_one("./src/advent13/input_example.txt"), 13);
     }
 
-
+    #[test]
+    fn ok_example_part_two() {
+        assert_eq!(part_two("./src/advent13/input_example.txt"), 140);
+    }
 
     #[test]
     fn compare_ok() {
