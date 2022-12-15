@@ -3,7 +3,7 @@ use std::io::{BufReader, prelude::*};
 
 use indextree::Arena;
 
-fn advent13(file_path: &str, is_part_one: bool) -> u32 {
+fn part_one(file_path: &str) -> u32 {
     let file = File::open(file_path).unwrap();
     let reader = BufReader::new(file);
     let mut count = 0;
@@ -14,10 +14,14 @@ fn advent13(file_path: &str, is_part_one: bool) -> u32 {
         if line.is_empty() {
             previous_line.clear();
         } else if !previous_line.is_empty() {
-            if compare(
+            let ressss = compare(
                 Pair::new(previous_line.clone(), line.clone())
-            ) {
+            );
+            if ressss == 1 {
                 count += line_index;
+            }
+            if ressss == 0 {
+                panic!("fdsfdsfsddfs");
             }
             line_index += 1;
         } else {
@@ -25,6 +29,10 @@ fn advent13(file_path: &str, is_part_one: bool) -> u32 {
         }
     }
     return count;
+}
+
+fn part_two(file_path: &str) -> u32 {
+    return 0;
 }
 
 struct Pair {
@@ -47,7 +55,7 @@ impl Pair {
     }
 }
 
-fn compare(pair: Pair) -> bool {
+fn compare(pair: Pair) -> i8 {
     println!("Compare {} vs {}", pair.left.clone(), pair.right.clone());
     let left_elements: Vec<String> = split(pair.left.clone());
     let right_elements: Vec<String> = split(pair.right.clone());
@@ -58,43 +66,52 @@ fn compare(pair: Pair) -> bool {
         println!("    Compare {} vs {}", left_opt.unwrap_or(&"".to_string()), right_opt.unwrap_or(&"".to_string()));
 
         if right_opt.is_none() {
-            return false;
+            return -1;
         }
         if left_opt.is_none() {
-            return true;
+            return 1;
         }
         let right = right_opt.unwrap();
         let left = left_elements.get(i).unwrap();
 
         if left.starts_with("[") && right.starts_with("[") {
-            // [[4,4]   ,4    ,4   ,4   ]
-            return compare(Pair::new(
+            let res = compare(Pair::new(
                 left.clone(),
                 right.clone(),
             ));
+            if res != 0 {
+                return res;
+            }
         } else if !left.starts_with("[") && right.starts_with("[") {
-            return compare(Pair::new(
+            let res = compare(Pair::new(
                 format!("[{}]", left.clone()),
                 right.clone(),
             ));
+            if res != 0 {
+                return res;
+            }
         } else if left.starts_with("[") && !right.starts_with("[") {
-            return compare(Pair::new(
+            let res = compare(Pair::new(
                 left.clone(),
                 format!("[{}]", right.clone()),
             ));
-        } else {}
-        if is_left_higher_than_right(left, right) {
-            return false;
-        }
-        if is_left_lower_than_right(left, right) {
-            return true;
+            if res != 0 {
+                return res;
+            }
+        } else {
+            if is_left_higher_than_right(left, right) {
+                return -1;
+            }
+            if is_left_lower_than_right(left, right) {
+                return 1;
+            }
         }
     }
-    return true;
+    return 0;
 }
 
 fn is_left_higher_than_right(left_element: &String, right_element: &String) -> bool {
-    left_element.parse::<u32>().unwrap() > right_element.parse::<u32>().unwrap()
+    left_element.parse::<u32>().expect(&*format!("{} was not a digit", left_element)) > right_element.parse::<u32>().unwrap()
 }
 
 fn is_left_lower_than_right(left_element: &String, right_element: &String) -> bool {
@@ -112,7 +129,8 @@ fn split(input: String) -> Vec<String> {
 
     let mut opened_list_count = 0;
     let mut buffer = String::new();
-    for element in input_inside_list.chars() {
+    for i in 0..input_inside_list.chars().count() {
+        let element = input_inside_list.chars().nth(i).unwrap();
         if opened_list_count == 0 && element == '[' {
             opened_list_count += 1;
         } else if opened_list_count == 1 {
@@ -137,8 +155,15 @@ fn split(input: String) -> Vec<String> {
             }
             buffer.push(element);
         } else {
-            if element != ',' {
-                result.push(element.to_string())
+            if element == ',' {
+                // result.push(buffer.clone());
+                // buffer.clear();
+            } else {
+                buffer.push(element);
+                if input_inside_list.chars().nth(i + 1).is_none() || (input_inside_list.chars().nth(i + 1).is_some() && !input_inside_list.chars().nth(i + 1).unwrap().is_digit(10)) {
+                    result.push(buffer.clone());
+                    buffer.clear();
+                }
             }
         }
     }
@@ -148,41 +173,60 @@ fn split(input: String) -> Vec<String> {
 
 #[cfg(test)]
 mod tests {
-    use crate::advent13::{advent13, compare, Pair, split};
+    use crate::advent13::{part_one, compare, Pair, split, part_two};
 
     #[test]
     fn ok_example_1() {
-        assert_eq!(advent13("./src/advent13/input_example.txt", true), 13);
+        assert_eq!(part_one("./src/advent13/input_example.txt"), 13);
     }
+
 
 
     #[test]
     fn compare_ok() {
-        assert_eq!(compare(Pair::new_from_str("[1,1,3,1,1]", "[1,1,5,1,1]")), true);
-        assert_eq!(compare(Pair::new_from_str("[[1],[2,3,4]]", "[[1],4]")), true);
+        assert_eq!(compare(Pair::new_from_str("[1,1,3,1,1]", "[1,1,5,1,1]")), 1);
+        assert_eq!(compare(Pair::new_from_str("[[1],[2,3,4]]", "[[1],4]")), 1);
+        assert_eq!(compare(Pair::new_from_str("[[1],[2,3,4]]", "[[1],4]")), 1);
+        assert_eq!(compare(Pair::new_from_str("[9]", "[[8,7,6]]")), -1);
+        assert_eq!(compare(Pair::new_from_str("[[4,4],4,4]", "[[4,4],4,4,4]")), 1);
+        assert_eq!(compare(Pair::new_from_str("[7,7,7,7]", "[7,7,7]")), -1);
+        assert_eq!(compare(Pair::new_from_str("[]", "[3]")), 1);
+        assert_eq!(compare(Pair::new_from_str("[[[]]]", "[[]]")), -1);
+        assert_eq!(compare(Pair::new_from_str("[1,[2,[3,[4,[5,6,7]]]],8,9]", "[1,[2,[3,[4,[5,6,0]]]],8,9]")), -1);
 
-        assert_eq!(compare(Pair::new_from_str("[3,2]", "[1,5]")), false);
-        assert_eq!(compare(Pair::new_from_str("[7,7,7,7]", "[7,7,7]")), false);
-        assert_eq!(compare(Pair::new_from_str("[7,7]", "[7,7,7]")), true);
-        assert_eq!(compare(Pair::new_from_str("[[1,2]]", "[[3,4]]")), true);
-        assert_eq!(compare(Pair::new_from_str("[9]", "[[8,7,6]]")), false);
-        assert_eq!(compare(Pair::new_from_str("[[4,4],4,4]", "[[4,4],4,4,4]")), true);
-        assert_eq!(compare(Pair::new_from_str("[]", "[3]")), true);
-        assert_eq!(compare(Pair::new_from_str("[[[]]]", "[[]]")), false);
-        assert_eq!(compare(Pair::new_from_str("[[]]", "[]")), false);
-        assert_eq!(compare(Pair::new_from_str("[1,[2,[3,[4,[5,6,7]]]],8,9]", "[1,[2,[3,[4,[5,6,0]]]],8,9]")), false);
-        assert_eq!(compare(Pair::new_from_str("[3]", "[]")), false);
-        assert_eq!(compare(Pair::new_from_str("[[5]]", "[[7],[2,[6,[2,4,5,6],2,9,[4]],7,6],[[]],[7,[[10,10,3,7],9,[9],8],5,[],10],[]]")), true);
-        // assert_eq!(compare(Pair::new_from_str("[[1], [1,2]]", "[[1,2],[1]]")), false);
+        assert_eq!(compare(Pair::new_from_str("[3,2]", "[1,5]")), -1);
+        assert_eq!(compare(Pair::new_from_str("[7,7]", "[7,7,7]")), 1);
+        assert_eq!(compare(Pair::new_from_str("[[1,2]]", "[[3,4]]")), 1);
+        assert_eq!(compare(Pair::new_from_str("[[]]", "[]")), -1);
+        assert_eq!(compare(Pair::new_from_str("[3]", "[]")), -1);
+        assert_eq!(compare(Pair::new_from_str("[[5]]", "[[7],[2,[6,[2,4,5,6],2,9,[4]],7,6],[[]],[7,[[10,10,3,7],9,[9],8],5,[],10],[]]")), 1);
+
+        assert_eq!(compare(Pair::new_from_str("[1,1,5,1,1]", "[1,1,3,1,1]")), -1);
+        assert_eq!(compare(Pair::new_from_str("[1,[2,[3,[4,[5,6,0]]]],8,9]", "[1,[2,[3,[4,[5,6,7]]]],8,9]")), 1);
+        assert_eq!(compare(Pair::new_from_str("[[4,4],4,4,4]", "[[4,4],4,4]")), -1);
+        assert_eq!(compare(Pair::new_from_str("[7,7,7]", "[7,7,7,7]")), 1);
+
+
+        assert_eq!(compare(Pair::new_from_str("[[1], [1,2]]", "[[1,2],[1]]")), 1);
+        assert_eq!(compare(Pair::new_from_str("[[6,0,[3,1]]]", "[[6,0,[3,1]]]")), 0);
+        assert_eq!(compare(Pair::new_from_str("[1,1]", "[1,1]")), 0);
+        assert_eq!(compare(Pair::new_from_str("[[],[[[2,5],[3,3],9]],[]]", "[[6,10],[]]")), 1);
+        assert_eq!(compare(Pair::new_from_str("[[[[7,4],5,[6,6,0]],[1,[8,1,6],9],3,[[0,10],[0,3,8],[7,3,5],9],[]],[9,9,[[1,7,10,0,0],[2,1,1,6,4],[7,1],[],[7,7,5,9,5]]]]", "[]")), -1);
+        assert_eq!(compare(Pair::new_from_str("[8,8,4,6]", "[8,8,4,6,10]")), 1);
+        //
+        //
+        // // logan
+        assert_eq!(compare(Pair::new_from_str("[[0,[[9,6,4,5]],[]]]", "[[10,9,[[5,7],4,[5,8,0,9,8],[0,10],[3,1]],4]]")), 1);
+        assert_eq!(compare(Pair::new_from_str("[[10,[],[9,8,6,[2,7,0,8]],[],[[4,6,2,1,4],6,5]]]", "[[4,5,1,[[0,0],[6,10],4,5],10],[[2,4,6,1,[6,8]],[[2,0,10]],[[5,10],[6,4,5,6],[8,9,2]]],[[[],10,0,7,7],[[9,9,7,3,8]]],[[[7],3,8],[6,3],1,5]]")), -1);
     }
 
     #[test]
     fn split_ok() {
-        assert_eq!(split("[1,2]".to_string()), vec!["1", "2"]);
-        assert_eq!(split("[1,2]".to_string()), vec!["1", "2"]);
-        assert_eq!(split("[[1,2],3]".to_string()), vec!["[1,2]", "3"]);
-        assert_eq!(split("[1,[2],3]".to_string()), vec!["1", "[2]", "3"]);
-        assert_eq!(split("[[1,[2],3],4]".to_string()), vec!["[1,[2],3]", "4"]);
-        assert_eq!(split("[[4,4],4,4,4]".to_string()), vec!["[4,4]", "4", "4", "4"]);
+        // assert_eq!(split("[1,2]".to_string()), vec!["1", "2"]);
+        // assert_eq!(split("[[1,2],3]".to_string()), vec!["[1,2]", "3"]);
+        // assert_eq!(split("[1,[2],3]".to_string()), vec!["1", "[2]", "3"]);
+        // assert_eq!(split("[[1,[2],3],4]".to_string()), vec!["[1,[2],3]", "4"]);
+        // assert_eq!(split("[[4,4],4,4,4]".to_string()), vec!["[4,4]", "4", "4", "4"]);
+        assert_eq!(split("[10,20]".to_string()), vec!["10", "20"]);
     }
 }
