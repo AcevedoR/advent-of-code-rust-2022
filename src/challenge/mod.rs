@@ -45,12 +45,12 @@ pub fn largest_rectangle_area(heights: Vec<i32>) -> i32 {
 mod tests {
     use crate::challenge::largest_rectangle_area;
 
-    // #[test]
+    #[test]
     fn ok_example_1() {
         assert_eq!(largest_rectangle_area(vec![2, 1, 5, 6, 2, 3]), 10);
     }
 
-    // #[test]
+    #[test]
     fn ok_example_2() {
         assert_eq!(largest_rectangle_area(vec![3, 3, 3]), 9);
     }

@@ -2,8 +2,6 @@ use std::cmp::Ordering;
 use std::fs::File;
 use std::io::{BufReader, prelude::*};
 
-use indextree::Arena;
-
 fn part_one(file_path: &str) -> u32 {
     let file = File::open(file_path).unwrap();
     let reader = BufReader::new(file);

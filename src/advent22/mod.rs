@@ -1,9 +1,6 @@
-use std::cmp::Ordering;
-use std::collections::HashMap;
 use std::fs::File;
-use std::io::{BufReader, Lines, prelude::*};
+use std::io::{BufReader, prelude::*};
 
-use indextree::Arena;
 use regex::Regex;
 use std::io::{self, Write};
 
@@ -113,8 +110,9 @@ fn find_starting_position(grid: &Grid) -> Position {
     panic!();
 }
 
+#[allow(dead_code)]
 fn print_grid(grid: &Grid, move_history: Vec<AppliedMove>) {
-    let mut move_history = move_history;
+    let move_history = move_history;
     for y in 1..grid.max_y + 1 {
         for x in 1..grid.max_x + 1 {
             let cell = grid.get(x, y);
@@ -176,7 +174,7 @@ fn apply_move(grid: &Grid, move_input: MoveInput) -> AppliedMove {
             // wrap around
             let mut wrap_around_x = x;
             let mut wrap_around_y = y;
-            let mut opposite_cell: Option<&Cell> = None;
+            let opposite_cell: Option<&Cell>;
             let mut previous_cell : Option<&Cell>= Option::None;
             loop {
                 wrap_around_x -= x_increment;
@@ -268,7 +266,7 @@ enum Direction {
 mod tests {
     use crate::advent22::{AppliedMove, apply_commands, apply_move, Direction, MoveInput, parse_input, part_one};
     use crate::advent22::Direction::{EAST, NORTH, SOUTH, WEST};
-    use crate::advent22::grid_utils::{Grid, Position};
+    use crate::advent22::grid_utils::{ Position};
 
     #[test]
     fn ok_example_1() {
