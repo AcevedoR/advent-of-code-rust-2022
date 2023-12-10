@@ -19,6 +19,7 @@ mod advent2023_3;
 mod advent2023_4;
 mod advent2023_5;
 mod advent2023_6;
+mod advent2023_7;
 
 fn main() -> io::Result<()> {
     let file = File::open("./src/input.txt")?;
